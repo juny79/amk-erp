@@ -1,0 +1,214 @@
+﻿// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 1. 사용자 / 조직 / 역할 관리 (RBAC)
+enum Role {
+  ADMIN
+  MANAGER
+  STAFF
+}
+
+model User {
+  id             String         @id @default(cuid())
+  employeeNumber String         @unique // 사번
+  email          String         @unique
+  name           String
+  passwordHash   String
+  department     String         // 부서 (영업, 생산, 자재, 인사 등)
+  position       String         // 직급
+  role           Role           @default(STAFF)
+  phone          String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  // 관계 정의
+  attendances    Attendance[]
+  tasksAssigned  Task[]         @relation("TaskAssignee")
+  tasksCreated   Task[]         @relation("TaskCreator")
+  leaveRequests  LeaveRequest[] @relation("ApplicantLeaves")
+  approvedLeaves LeaveRequest[] @relation("ApproverLeaves")
+  auditLogs      AuditLog[]
+  chatSessions   ChatSession[]
+}
+
+// 2. 근태 관리 (출퇴근 및 근무시간)
+enum AttendanceStatus {
+  NORMAL     // 정상 출근
+  LATE       // 지각
+  EARLY_LEAVE// 조퇴
+  ABSENT     // 결근
+  FIELD_WORK // 외근/출장
+}
+
+model Attendance {
+  id          String           @id @default(cuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date        DateTime         @db.Date // 근무 일자
+  checkIn     DateTime?        // 출근 시각
+  checkOut    DateTime?        // 퇴근 시각
+  status      AttendanceStatus @default(NORMAL)
+  ipAddress   String?          // 출퇴근 체크 사내망 IP
+  locationGps String?          // 모바일 출퇴근 시 GPS 위경도
+  note        String?          // 특이사항 / 외근지 사유
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@unique([userId, date])
+  @@index([date])
+}
+
+// 3. 간이 전자결재 (휴가, 연차, 출장 신청)
+enum LeaveType {
+  ANNUAL       // 연차
+  HALF_AM      // 오전 반차
+  HALF_PM      // 오후 반차
+  SPECIAL      // 경조사/특별휴가
+  FIELD_WORK   // 외근/출장
+  OVERTIME     // 초과근무
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model LeaveRequest {
+  id          String         @id @default(cuid())
+  userId      String
+  user        User           @relation("ApplicantLeaves", fields: [userId], references: [id], onDelete: Cascade)
+  leaveType   LeaveType
+  startDate   DateTime       @db.Date
+  endDate     DateTime       @db.Date
+  days        Float          @default(1.0)
+  reason      String
+  status      ApprovalStatus @default(PENDING)
+  approverId  String?
+  approver    User?          @relation("ApproverLeaves", fields: [approverId], references: [id])
+  rejectionReason String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+// 4. 업무 공유 & 캘린더 플랫폼 (일/주/월 및 칸반 연동)
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model Task {
+  id          String       @id @default(cuid())
+  title       String       // 업무명 / 일정 제목
+  description String?      @db.Text
+  startDate   DateTime     // 시작 일시
+  endDate     DateTime     // 종료 일시
+  allDay      Boolean      @default(false)
+  status      TaskStatus   @default(TODO)
+  priority    TaskPriority @default(MEDIUM)
+  color       String?      @default("#3b82f6") // 캘린더 표시 색상
+
+  // 담당자 및 등록자
+  assigneeId  String?
+  assignee    User?        @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  creatorId   String
+  creator     User         @relation("TaskCreator", fields: [creatorId], references: [id])
+
+  department  String?      // 공유 부서 필터링용
+  tags        String[]     // 태그 (예: '생산', '긴급', 'M4볼트')
+  
+  // amk-inventory 연동 시 연계 키
+  linkedItemCode String?   // 연계 자재 코드
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([startDate, endDate])
+  @@index([status])
+  @@index([assigneeId])
+}
+
+// 5. amk-inventory 재고 연동 캐시 모델
+model InventoryCache {
+  id              String    @id @default(cuid())
+  itemCode        String    @unique // 품목 코드
+  itemName        String    // 품명
+  category        String?   // 분류
+  specification   String?   // 규격
+  unit            String    @default("EA")
+  currentStock    Float     @default(0) // 현재고
+  safetyStock     Float     @default(0) // 안전재고
+  warehouseLocation String? // 창고 위치
+  lastSyncedAt    DateTime  @default(now()) // amk-inventory 동기화 시각
+  isLowStock      Boolean   @default(false) // 안전재고 미달 여부
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([itemCode])
+  @@index([isLowStock])
+}
+
+// 6. Upstage Solar AI Agent 대화 세션 및 메시지
+model ChatSession {
+  id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String        @default("새로운 업무 상담")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  messages    ChatMessage[]
+}
+
+model ChatMessage {
+  id             String      @id @default(cuid())
+  sessionId      String
+  session        ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role           String      // "user" | "assistant" | "system" | "tool"
+  content        String      @db.Text
+  toolCalls      Json?       // Solar LLM Function Calling 요청 페이로드
+  toolResult     Json?       // ERP DB/API Tool 실행 결과
+  isConfirmed    Boolean     @default(false) // Human-in-the-loop 변경 승인 여부
+  createdAt      DateTime    @default(now())
+
+  @@index([sessionId])
+}
+
+// 7. 엔터프라이즈 감사 로그 (Audit Trail)
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  action     String   // "CREATE", "UPDATE", "DELETE", "CHECK_IN", "APPROVE"
+  entityName String   // "Attendance", "Task", "LeaveRequest", "Inventory"
+  entityId   String
+  beforeData Json?    // 변경 전 데이터
+  afterData  Json?    // 변경 후 데이터
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([entityName, entityId])
+  @@index([createdAt])
+}

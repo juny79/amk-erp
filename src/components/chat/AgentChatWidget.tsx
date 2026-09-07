@@ -27,6 +27,7 @@ interface Message {
 }
 
 export const AgentChatWidget: React.FC = () => {
+  const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([
@@ -40,6 +41,10 @@ export const AgentChatWidget: React.FC = () => {
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -101,6 +106,8 @@ export const AgentChatWidget: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+  if (!mounted) return null;
 
   return (
     <>

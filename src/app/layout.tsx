@@ -13,8 +13,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ko">
-      <body className="antialiased relative min-h-screen bg-slate-50 text-slate-900">
+    <html lang="ko" suppressHydrationWarning>
+      <body className="antialiased relative min-h-screen bg-slate-50 text-slate-900" suppressHydrationWarning>
         {children}
         {/* 전사 어디서나 접근 가능한 Upstage Solar AI Agent 플로팅 챗봇 */}
         <AgentChatWidget />

@@ -54,6 +54,45 @@ export const AgentChatWidget: React.FC = () => {
     if (isOpen) scrollToBottom();
   }, [messages, isOpen]);
 
+  // 마크다운 **텍스트** 볼드 및 가독성 최적화 렌더러
+  const renderFormattedMessage = (content: string, isUser: boolean) => {
+    if (isUser) {
+      return <div className="whitespace-pre-wrap leading-relaxed">{content}</div>;
+    }
+
+    return (
+      <div className="space-y-1 text-slate-800 leading-relaxed text-xs">
+        {content.split("\n").map((line, lineIdx) => {
+          // **볼드** 구문 파싱
+          const parts = line.split(/(\*\*[^*]+\*\*)/g);
+          const isBullet = line.trim().startsWith("•") || line.trim().startsWith("-");
+
+          return (
+            <div
+              key={lineIdx}
+              className={`${isBullet ? "pl-2.5 py-0.5 border-l-2 border-purple-200" : "py-0.5"}`}
+            >
+              {parts.map((part, partIdx) => {
+                if (part.startsWith("**") && part.endsWith("**")) {
+                  const boldText = part.slice(2, -2);
+                  return (
+                    <strong
+                      key={partIdx}
+                      className="font-black text-slate-900 bg-purple-100/70 text-purple-950 px-1.5 py-0.5 rounded-md text-[11.5px] border border-purple-200/60 inline-block mx-0.5"
+                    >
+                      {boldText}
+                    </strong>
+                  );
+                }
+                return <span key={partIdx}>{part}</span>;
+              })}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   const handleSend = async (textToSend?: string) => {
     const text = textToSend || input;
     if (!text.trim() || isLoading) return;
@@ -111,7 +150,7 @@ export const AgentChatWidget: React.FC = () => {
 
   return (
     <>
-      {/* 1. 우측 하단 플로팅 챗봇 트리거 버튼 (최상위 z-index 및 인라인 스타일 보장) */}
+      {/* 1. 우측 하단 플로팅 챗봇 트리거 버튼 */}
       {!isOpen && (
         <button
           type="button"
@@ -160,7 +199,7 @@ export const AgentChatWidget: React.FC = () => {
                 <div className="flex items-center gap-1.5">
                   <h4 className="text-sm font-extrabold">AMK Solar Agent</h4>
                   <span className="text-[9px] bg-emerald-500/20 text-emerald-300 font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">
-                    Function Calling
+                    Live Solar Pro
                   </span>
                 </div>
                 <p className="text-[10px] text-slate-300">Upstage Solar 기반 업무/재고 총괄 비서</p>
@@ -183,31 +222,31 @@ export const AgentChatWidget: React.FC = () => {
                 className={`flex gap-2.5 ${m.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 {m.role === "assistant" && (
-                  <div className="w-7 h-7 bg-purple-100 text-purple-700 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="w-7 h-7 bg-purple-100 text-purple-700 rounded-lg flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
                     <Bot className="w-4 h-4" />
                   </div>
                 )}
 
-                <div className="space-y-1.5 max-w-[82%]">
+                <div className="space-y-1.5 max-w-[85%]">
                   <div
-                    className={`p-3.5 rounded-2xl whitespace-pre-wrap leading-relaxed shadow-xs ${
+                    className={`p-3.5 rounded-2xl shadow-xs ${
                       m.role === "user"
                         ? "bg-purple-600 text-white rounded-tr-xs"
                         : "bg-white text-slate-800 border border-slate-200/80 rounded-tl-xs"
                     }`}
                   >
-                    {m.content}
+                    {renderFormattedMessage(m.content, m.role === "user")}
                   </div>
 
                   {/* 실행된 Tool 결과 인터랙티브 카드 (시각화) */}
                   {m.toolExecuted && (
-                    <div className="p-2.5 bg-purple-50/80 border border-purple-200/80 rounded-xl text-[11px] text-purple-900 space-y-1">
-                      <div className="flex items-center gap-1 font-bold text-purple-700">
+                    <div className="p-2.5 bg-purple-50/90 border border-purple-200/90 rounded-xl text-[11px] text-purple-950 space-y-1 shadow-2xs">
+                      <div className="flex items-center gap-1 font-extrabold text-purple-800">
                         <Sparkles className="w-3 h-3 text-purple-600" />
-                        <span>실행된 ERP 액션: {m.toolExecuted.name}</span>
+                        <span>실행된 ERP 기능: {m.toolExecuted.name}</span>
                       </div>
-                      <div className="text-[10px] text-slate-500 font-mono">
-                        결과: {JSON.stringify(m.toolExecuted.result).slice(0, 80)}...
+                      <div className="text-[10px] text-slate-600 font-mono">
+                        결과: {JSON.stringify(m.toolExecuted.result).slice(0, 75)}...
                       </div>
                     </div>
                   )}
@@ -228,7 +267,7 @@ export const AgentChatWidget: React.FC = () => {
                 <div className="w-7 h-7 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center animate-pulse">
                   <Bot className="w-4 h-4" />
                 </div>
-                <div className="text-xs bg-white border border-slate-200 p-3 rounded-2xl animate-pulse">
+                <div className="text-xs bg-white border border-slate-200 p-3 rounded-2xl animate-pulse text-purple-900 font-medium">
                   Solar LLM이 요청을 분석하고 ERP 도구를 실행 중입니다...
                 </div>
               </div>
@@ -272,7 +311,7 @@ export const AgentChatWidget: React.FC = () => {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
               placeholder="업무 지시나 재고 질문을 입력하세요..."
-              className="flex-1 px-3.5 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-purple-500 text-slate-800"
+              className="flex-1 px-3.5 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-purple-500 text-slate-800 font-medium"
             />
             <button
               disabled={isLoading || !input.trim()}

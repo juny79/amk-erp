@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { Calendar, Clock, PackageCheck, Bot, CheckCircle2, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
@@ -11,7 +11,7 @@ export default function HomePage() {
           <div>
             <div className="flex items-center gap-3">
               <span className="bg-blue-600 text-white font-bold px-3 py-1 rounded-lg text-sm tracking-wider">AMK ERP</span>
-              <span className="text-xs bg-emerald-100 text-emerald-700 font-semibold px-2.5 py-0.5 rounded-full">Phase 3 Deployed</span>
+              <span className="text-xs bg-emerald-100 text-emerald-700 font-semibold px-2.5 py-0.5 rounded-full">Phase 4 Active</span>
             </div>
             <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 mt-2">
               AMK 차세대 통합 ERP & AI Agent 플랫폼
@@ -20,12 +20,18 @@ export default function HomePage() {
               업무 공유 캘린더 • 스마트 근태 • amk-inventory 재고 연동 • Upstage Solar Agent
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2.5">
             <Link
               href="/calendar"
-              className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm transition-all shadow-sm"
+              className="flex items-center gap-1.5 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm transition-all shadow-sm"
             >
-              업무 캘린더 / 칸반 바로가기 <ArrowRight className="w-4 h-4" />
+              업무 캘린더 <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              href="/attendance"
+              className="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm transition-all shadow-sm"
+            >
+              근태 관리 <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </header>
@@ -46,22 +52,27 @@ export default function HomePage() {
               일간/주간/월간 캘린더 및 드래그앤드롭 칸반보드 상호 연동 업무 관리
             </p>
             <div className="mt-4 flex items-center gap-1.5 text-xs text-emerald-600 font-semibold">
-              <CheckCircle2 className="w-4 h-4" /> Phase 3 개발 완료 (체험 가능)
+              <CheckCircle2 className="w-4 h-4" /> Phase 3 배포 완료
             </div>
           </Link>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-emerald-300 transition-all">
-            <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center mb-4">
+          <Link
+            href="/attendance"
+            className="bg-white p-6 rounded-2xl border border-emerald-200 shadow-sm hover:shadow-md hover:border-emerald-400 transition-all group block"
+          >
+            <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
               <Clock className="w-6 h-6" />
             </div>
-            <h2 className="font-bold text-slate-900 text-lg">스마트 근태 관리</h2>
+            <h2 className="font-bold text-slate-900 text-lg group-hover:text-emerald-600 transition-colors">
+              스마트 근태 관리
+            </h2>
             <p className="text-slate-500 text-xs mt-2 leading-relaxed">
               사내 IP/위치 인증 원클릭 출퇴근 체크, 실시간 근무현황판, 연차 결재선
             </p>
-            <div className="mt-4 flex items-center gap-1.5 text-xs text-blue-600 font-semibold">
-              <CheckCircle2 className="w-4 h-4" /> Phase 4 개발 대기
+            <div className="mt-4 flex items-center gap-1.5 text-xs text-emerald-600 font-semibold">
+              <CheckCircle2 className="w-4 h-4" /> Phase 4 개발 완료 (체험 가능)
             </div>
-          </div>
+          </Link>
 
           <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-amber-300 transition-all">
             <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center mb-4">
@@ -72,7 +83,7 @@ export default function HomePage() {
               기존 재고관리 프로그램 어댑터 연동, 안전재고 부족 알림, 입출고 일정
             </p>
             <div className="mt-4 flex items-center gap-1.5 text-xs text-amber-600 font-semibold">
-              <CheckCircle2 className="w-4 h-4" /> Phase 5 어댑터 연동
+              <CheckCircle2 className="w-4 h-4" /> Phase 5 어댑터 연동 대기
             </div>
           </div>
 
@@ -85,26 +96,26 @@ export default function HomePage() {
               Function Calling 자연어 대화 일정 등록, 재고 조회, 근태 처리 챗봇
             </p>
             <div className="mt-4 flex items-center gap-1.5 text-xs text-purple-600 font-semibold">
-              <CheckCircle2 className="w-4 h-4" /> Phase 6 탑재
+              <CheckCircle2 className="w-4 h-4" /> Phase 6 탑재 대기
             </div>
           </div>
         </div>
 
-        {/* 안내 배너 */}
-        <section className="bg-slate-900 text-white rounded-2xl p-8 shadow-md">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div>
-              <span className="text-xs uppercase tracking-wider text-emerald-400 font-bold">Phase 3 Live</span>
-              <h3 className="text-xl font-bold mt-1">스마트 업무 공유 캘린더 & 칸반 보드 구축 완료</h3>
-              <p className="text-slate-400 text-sm mt-2 max-w-2xl">
-                일간/주간/월간 멀티뷰 캘린더, HTML5 드래그 앤 드롭 실시간 상태 업데이트 칸반, amk-inventory 자재코드 연동 태그가 탑재되었습니다.
-              </p>
-            </div>
+        {/* 대시보드 배너 */}
+        <section className="bg-slate-900 text-white rounded-2xl p-8 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <span className="text-xs uppercase tracking-wider text-emerald-400 font-bold">Phase 4 Live</span>
+            <h3 className="text-xl font-bold mt-1">스마트 근태 관리 및 간이 전자결재 시스템 가동</h3>
+            <p className="text-slate-400 text-sm mt-2 max-w-2xl">
+              실시간 원클릭 출퇴근(정상/지각 자동판정), 부서별 근무현황판, 연차/외근 신청 및 팀장 승인 결재선이 구축되었습니다.
+            </p>
+          </div>
+          <div className="flex gap-2">
             <Link
-              href="/calendar"
-              className="bg-blue-600 hover:bg-blue-500 px-5 py-3.5 rounded-xl text-center text-sm font-bold text-white transition-colors"
+              href="/attendance"
+              className="bg-emerald-600 hover:bg-emerald-500 px-5 py-3.5 rounded-xl text-center text-sm font-bold text-white transition-colors"
             >
-              업무 캘린더 열기 &rarr;
+              근태 관리 열기 &rarr;
             </Link>
           </div>
         </section>

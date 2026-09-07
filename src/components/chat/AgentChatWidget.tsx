@@ -111,28 +111,47 @@ export const AgentChatWidget: React.FC = () => {
 
   return (
     <>
-      {/* 우측 하단 플로팅 챗봇 트리거 버튼 */}
+      {/* 1. 우측 하단 플로팅 챗봇 트리거 버튼 (최상위 z-index 및 인라인 스타일 보장) */}
       {!isOpen && (
         <button
+          type="button"
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-5 py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-105 active:scale-95 group"
+          style={{
+            position: "fixed",
+            bottom: "28px",
+            right: "28px",
+            zIndex: 999999,
+          }}
+          className="flex items-center gap-3 px-5 py-3.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-full shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer ring-4 ring-white/80"
+          aria-label="AMK AI Agent 챗봇 열기"
         >
-          <div className="relative">
-            <Bot className="w-5 h-5 text-white" />
-            <span className="absolute -top-1 -right-1 flex h-2 w-2">
+          <div className="relative flex items-center justify-center">
+            <Bot className="w-6 h-6 text-white animate-bounce" />
+            <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
             </span>
           </div>
-          <span className="text-xs font-black tracking-wide">AMK Solar Agent</span>
+          <div className="flex flex-col text-left">
+            <span className="text-xs font-black tracking-wide leading-none">AMK Solar Agent</span>
+            <span className="text-[10px] text-purple-200 font-semibold mt-0.5">AI 업무 비서 챗봇</span>
+          </div>
         </button>
       )}
 
-      {/* 챗봇 대화 창 */}
+      {/* 2. 챗봇 대화 창 */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-[92vw] sm:w-[420px] h-[580px] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200">
+        <div
+          style={{
+            position: "fixed",
+            bottom: "24px",
+            right: "24px",
+            zIndex: 999999,
+          }}
+          className="w-[92vw] sm:w-[420px] h-[600px] max-h-[85vh] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200"
+        >
           {/* 챗봇 헤더 */}
-          <div className="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 p-4 text-white flex items-center justify-between shadow-xs">
+          <div className="bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 p-4 text-white flex items-center justify-between shadow-sm">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 bg-purple-500/30 rounded-xl flex items-center justify-center border border-purple-400/30">
                 <Bot className="w-5 h-5 text-purple-200" />
@@ -140,8 +159,8 @@ export const AgentChatWidget: React.FC = () => {
               <div>
                 <div className="flex items-center gap-1.5">
                   <h4 className="text-sm font-extrabold">AMK Solar Agent</h4>
-                  <span className="text-[9px] bg-emerald-500/20 text-emerald-300 font-bold px-1.5 py-0.2 rounded border border-emerald-500/30">
-                    Live Function Calling
+                  <span className="text-[9px] bg-emerald-500/20 text-emerald-300 font-bold px-1.5 py-0.5 rounded border border-emerald-500/30">
+                    Function Calling
                   </span>
                 </div>
                 <p className="text-[10px] text-slate-300">Upstage Solar 기반 업무/재고 총괄 비서</p>
@@ -150,7 +169,7 @@ export const AgentChatWidget: React.FC = () => {
 
             <button
               onClick={() => setIsOpen(false)}
-              className="p-1.5 rounded-lg hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
+              className="p-1.5 rounded-lg hover:bg-white/10 text-slate-300 hover:text-white transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -221,25 +240,25 @@ export const AgentChatWidget: React.FC = () => {
           <div className="p-2 bg-slate-100 border-t border-slate-200 flex items-center gap-1.5 overflow-x-auto text-[10px]">
             <button
               onClick={() => handleSend("FB-01 부품 재고 얼마 남았어?")}
-              className="whitespace-nowrap px-2.5 py-1 bg-white hover:bg-slate-200 text-slate-700 font-semibold rounded-lg border border-slate-200 shadow-2xs"
+              className="whitespace-nowrap px-2.5 py-1 bg-white hover:bg-slate-200 text-slate-700 font-semibold rounded-lg border border-slate-200 shadow-2xs cursor-pointer"
             >
               📦 FB-01 재고 조회
             </button>
             <button
               onClick={() => handleSend("안전재고 부족한 품목 리스트 뽑아줘")}
-              className="whitespace-nowrap px-2.5 py-1 bg-white hover:bg-slate-200 text-slate-700 font-semibold rounded-lg border border-slate-200 shadow-2xs"
+              className="whitespace-nowrap px-2.5 py-1 bg-white hover:bg-slate-200 text-slate-700 font-semibold rounded-lg border border-slate-200 shadow-2xs cursor-pointer"
             >
               ⚠️ 부족 재고 경고
             </button>
             <button
               onClick={() => handleSend("내일 오전 자재 발주 회의 일정 등록해줘")}
-              className="whitespace-nowrap px-2.5 py-1 bg-white hover:bg-slate-200 text-slate-700 font-semibold rounded-lg border border-slate-200 shadow-2xs"
+              className="whitespace-nowrap px-2.5 py-1 bg-white hover:bg-slate-200 text-slate-700 font-semibold rounded-lg border border-slate-200 shadow-2xs cursor-pointer"
             >
               📅 캘린더 등록
             </button>
             <button
               onClick={() => handleSend("오늘 출근 체크해줘")}
-              className="whitespace-nowrap px-2.5 py-1 bg-white hover:bg-slate-200 text-slate-700 font-semibold rounded-lg border border-slate-200 shadow-2xs"
+              className="whitespace-nowrap px-2.5 py-1 bg-white hover:bg-slate-200 text-slate-700 font-semibold rounded-lg border border-slate-200 shadow-2xs cursor-pointer"
             >
               ⏰ 출근 체크
             </button>
@@ -258,7 +277,7 @@ export const AgentChatWidget: React.FC = () => {
             <button
               disabled={isLoading || !input.trim()}
               onClick={() => handleSend()}
-              className="p-2 bg-purple-600 hover:bg-purple-700 disabled:bg-slate-300 text-white rounded-xl shadow-xs transition-colors"
+              className="p-2 bg-purple-600 hover:bg-purple-700 disabled:bg-slate-300 text-white rounded-xl shadow-xs transition-colors cursor-pointer"
             >
               <Send className="w-4 h-4" />
             </button>

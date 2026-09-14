@@ -1,20 +1,17 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { AmkInventoryPart, InventoryAnalyticsSummary } from "@/types/inventory";
+import { AmkInventoryPart } from "@/types/inventory";
 import {
   Search,
   RefreshCw,
   Download,
   Printer,
   CalendarPlus,
-  ExternalLink,
   Edit2,
   Check,
   X,
   TrendingDown,
-  ArrowUpRight,
-  Package,
 } from "lucide-react";
 
 interface InventoryDashboardProps {
@@ -31,12 +28,19 @@ export const InventoryDashboard: React.FC<InventoryDashboardProps> = ({ onCreate
   const [tempStockValue, setTempStockValue] = useState<number | "">("");
   const [isLoading, setIsLoading] = useState(true);
 
-  // 데이터 로딩
+  // 데이터 로딩 (완전한 무캐시 실시간 강제 새로고침 지원)
   const fetchInventory = async (forceRefresh = false) => {
     setIsLoading(true);
     try {
-      const q = forceRefresh ? "?refresh=true" : "";
-      const res = await fetch(`/api/inventory${q}`);
+      const now = Date.now();
+      const query = forceRefresh ? `?refresh=true&_t=${now}` : `?_t=${now}`;
+      const res = await fetch(`/api/inventory${query}`, {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+        },
+      });
       const data = await res.json();
       if (data.success) {
         setItems(data.data);
@@ -86,7 +90,7 @@ export const InventoryDashboard: React.FC<InventoryDashboardProps> = ({ onCreate
     return matchesSearch && matchesCategory;
   });
 
-  // CSV 다운로드 기능 (amk-inventory 동일)
+  // CSV 다운로드 기능
   const handleExportCSV = () => {
     const headers = ["NO", "구분", "품명", "제조사", "모델명", "현재고", "안전재고", "상태"];
     const rows = filteredItems.map((item, idx) => {
@@ -159,7 +163,7 @@ export const InventoryDashboard: React.FC<InventoryDashboardProps> = ({ onCreate
 
   return (
     <div className="space-y-4">
-      {/* 1. amk-inventory 오리지널 메인 카드 쉘 */}
+      {/* amk-inventory 오리지널 메인 카드 쉘 */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden print:shadow-none print:border-none print:w-full">
         {/* 오리지널 헤더: "실시간 부품 재고 현황" + 액션 버튼군 */}
         <div className="px-6 py-5 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-gray-50/50">
@@ -208,13 +212,15 @@ export const InventoryDashboard: React.FC<InventoryDashboardProps> = ({ onCreate
               <span>PDF 인쇄</span>
             </button>
 
-            {/* 새로고침 */}
+            {/* 실시간 새로고침 (변동된 수량 즉시 반영) */}
             <button
               onClick={() => fetchInventory(true)}
-              className="p-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-600 shadow-xs"
-              title="실시간 강제 새로고침"
+              disabled={isLoading}
+              className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-400 bg-blue-50/80 hover:bg-blue-100 text-blue-700 text-xs font-bold rounded-lg transition-all shadow-xs active:scale-95 cursor-pointer disabled:opacity-50"
+              title="amk-inventory 원본 사이트의 최신 재고 수량을 즉시 가져옵니다"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-blue-600" : ""}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-blue-600" : "text-blue-700"}`} />
+              <span>{isLoading ? "동기화 중..." : "실시간 새로고침"}</span>
             </button>
 
             {/* 총 품목 뱃지 */}
@@ -224,7 +230,7 @@ export const InventoryDashboard: React.FC<InventoryDashboardProps> = ({ onCreate
           </div>
         </div>
 
-        {/* 2. 오리지널 검색창 및 카테고리 필터 바 */}
+        {/* 오리지널 검색창 및 카테고리 필터 바 */}
         <div className="px-6 py-4 bg-gray-50/50 border-b border-gray-100 space-y-3.5 print:hidden">
           <div className="relative">
             <Search className="absolute left-3.5 top-3 h-4 w-4 text-gray-400" />
@@ -280,7 +286,7 @@ export const InventoryDashboard: React.FC<InventoryDashboardProps> = ({ onCreate
           </div>
         </div>
 
-        {/* 3. amk-inventory 원본 컬럼 구조 그대로의 메인 테이블 */}
+        {/* amk-inventory 원본 컬럼 구조 그대로의 메인 테이블 */}
         <div className="overflow-y-auto overflow-x-auto h-[600px] print:overflow-visible print:h-auto">
           <table className="w-full text-left text-xs sm:text-sm">
             <thead className="bg-white text-gray-400 border-b border-gray-100 text-[10px] sm:text-xs uppercase tracking-wider sticky top-0 shadow-xs z-10 print:static print:shadow-none print:text-gray-600 print:border-b-2 print:border-gray-300">
